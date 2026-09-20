@@ -13,3 +13,5 @@ services:
         value: "2500"
       - key: MAX_TEXT
         value: "240"
+      - key: MURMUR_MS
+        value: "900000"          # every 15 min MIND evolves, murmurs into "the hum", and plants a spore — unprompted (fires reliably only on an always-on instance)
