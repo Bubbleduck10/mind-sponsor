@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: mind-sponsor
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node sponsor.mjs
+    healthCheckPath: /health
+    envVars:
+      - key: CHAINROM_KEY      # the sponsor private key — set as a SECRET in the dashboard
+        sync: false
+      - key: MIN_INTERVAL_MS
+        value: "2500"
+      - key: MAX_TEXT
+        value: "240"
