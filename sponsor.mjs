@@ -19,8 +19,10 @@ import { signingSender, addressOf } from "./vendor/sign.mjs";
 import { generate } from "./voice.js";
 
 const ki = process.argv.indexOf("--key-file");
-const KEY = ki >= 0 && process.argv[ki + 1] ? fs.readFileSync(process.argv[ki + 1], "utf8").replace(/^\uFEFF/, "").trim() : (process.env.CHAINROM_KEY || "");
-if (!/^0x[0-9a-fA-F]{64}$/.test(KEY)) { console.error("bad or missing --key-file"); process.exit(1); }
+let KEY = ki >= 0 && process.argv[ki + 1] ? fs.readFileSync(process.argv[ki + 1], "utf8") : (process.env.CHAINROM_KEY || "");
+KEY = KEY.replace(/^\uFEFF/, "").trim();
+if (/^[0-9a-fA-F]{64}$/.test(KEY)) KEY = "0x" + KEY; // MetaMask exports the key without the 0x prefix
+if (!/^0x[0-9a-fA-F]{64}$/.test(KEY)) { console.error("bad or missing key (need 64 hex chars, with or without 0x) via CHAINROM_KEY or --key-file"); process.exit(1); }
 
 const dep = JSON.parse(fs.readFileSync(new URL("./voice-deploy.json", import.meta.url)));
 const RPC = process.env.RPC || dep.rpc;
