@@ -17,6 +17,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { rpcOver } from "./vendor/rpc.mjs";
 import { signingSender, addressOf } from "./vendor/sign.mjs";
 import { generate } from "./voice.js";
+import { loadModel, generateLocal, isLoaded } from "./model-local.mjs";
 
 const ki = process.argv.indexOf("--key-file");
 let KEY = ki >= 0 && process.argv[ki + 1] ? fs.readFileSync(process.argv[ki + 1], "utf8") : (process.env.CHAINROM_KEY || "");
@@ -77,7 +78,11 @@ async function mindReply(userText, salt) {
   const prompt = (clean(userText, MAX_TEXT).toLowerCase() + " ").replace(/\s+/g, " ");
   const seed = seedNum(prompt + salt);
   const temp = 0.8 + (seedNum(salt + "t") % 25) / 100; // 0.80..1.04
-  const r = await generate(RPC, VOICE, prompt, { seed, temp, chars: 180, minChars: 50 });
+  // local forward pass (weights read from chain once) — identical to on-chain
+  // stepLogits, but no per-char eth_call so the public RPC can't rate-limit us.
+  const r = isLoaded()
+    ? generateLocal(prompt, { seed, temp, chars: 180, minChars: 50 })
+    : await generate(RPC, VOICE, prompt, { seed, temp, chars: 180, minChars: 50 });
   return r || "…";
 }
 
@@ -130,11 +135,20 @@ const server = http.createServer(async (req, res) => {
   });
 });
 
+// read the weights off-chain ONCE so replies compute locally (no RPC rate limits)
+try {
+  const n = await loadModel(rpc, dep.chunks);
+  console.log(`  model     loaded ${n} bytes from chain (local generation)`);
+} catch (e) {
+  console.error(`  ! model load failed (${e.message}); falling back to on-chain stepLogits`);
+}
+
 server.listen(PORT, () => {
   console.log(`\n  THE SPONSOR listening on :${PORT}`);
   console.log(`  from      ${from}`);
   console.log(`  voice     ${VOICE}`);
   console.log(`  backrooms ${BR}`);
+  console.log(`  mode      ${isLoaded() ? "local weights" : "on-chain stepLogits"}`);
   console.log(`  chain     ${CHAIN_ID}  via ${RPC}\n`);
 });
 
