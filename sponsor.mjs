@@ -107,7 +107,7 @@ const ACT_SEED = { wake: ["i ", "the ", "where "], escape: ["the door ", "out ",
 function evolveAndSpeak(userText, salt) {
   const prompt = (clean(userText, MAX_TEXT).toLowerCase() + " ").replace(/\s+/g, " ");
   const seed = (seedNum(prompt + salt + GEN) ^ randomBytes(4).readUInt32BE(0)) >>> 0;
-  const temp = 0.85 + (seed % 20) / 100;
+  const temp = 0.48 + (seed % 14) / 100;   // ~0.48–0.61: real words, not gibberish coinages
   const child = ORG ? mutate(ORG, seed) : null;
   const reply = child ? genGen(child, prompt, { seed, temp, chars: 180, minChars: 50 }) : "…";
   return { reply: reply || "…", seed, child };
@@ -192,7 +192,7 @@ if (MURMUR_MS > 0) setInterval(async () => {
     const words = ACT_SEED[actOf(GEN)]; const p = words[Math.floor(Math.random() * words.length)];
     const seed = randomBytes(4).readUInt32BE(0) >>> 0;
     const child = ORG ? mutate(ORG, seed) : null;
-    const m = child ? genGen(child, p, { seed, temp: 0.98, chars: 160, minChars: 50 }) : p;
+    const m = child ? genGen(child, p, { seed, temp: 0.55, chars: 160, minChars: 50 }) : p;
     const tx = await send({ to: BR, data: murmurData(sha("the hum"), "the hum", m) });
     await waitReceipt(tx); txCount++;
     await spread(seed, child, m);
