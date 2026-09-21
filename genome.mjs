@@ -7,7 +7,7 @@ import { CHARS, K, V, OUTSCALE, ctxOf, mulberry32, sample } from "./voice.js";
 const E = 24, H = 256;
 const OFF_EMB = 0, OFF_W1 = V * E, OFF_W2 = OFF_W1 + K * E * H, OFF_B1 = OFF_W2 + H * V, OFF_B2 = OFF_B1 + H * 4;
 export const GENOME_LEN = OFF_B2 + V * 4; // 109552
-export const MUT_RATE = 0.02, MUT_MAG = 1; // per-generation: nudge ~2% of weights by ±1
+export const MUT_RATE = 0.002, MUT_MAG = 1; // per-generation: nudge ~0.2% of weights by ±1 — gentle drift so it stays coherent across hundreds of generations
 
 const hexToBytes = (h) => { const u = new Uint8Array(h.length / 2); for (let i = 0; i < u.length; i++) u[i] = parseInt(h.substr(i * 2, 2), 16); return u; };
 
