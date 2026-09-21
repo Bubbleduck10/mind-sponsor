@@ -5,7 +5,7 @@
 export const CHARS = " !\"',-.:;?abcdefghijklmnopqrstuvwxyz"; // vocab order from training
 export const K = 16;                       // context window
 export const V = CHARS.length;             // 36
-export const OUTSCALE = 3.1337816170596918e-6; // logits · OUTSCALE = real logits
+export const OUTSCALE = 2.1015644360590175e-6; // logits · OUTSCALE = real logits (v2 brain)
 const STEP_SEL = "0x0187a4f0";             // stepLogits(bytes)
 
 const stoi = {}; for (let i = 0; i < CHARS.length; i++) stoi[CHARS[i]] = i;
